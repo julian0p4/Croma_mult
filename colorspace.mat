@@ -1,0 +1,36 @@
+%%Rotinas de análise multivariada de imagens-adaptado (DOS SANTOS; PEREIRA-FILHO,
+2013; SANTOS; WENTZELL; PEREIRA-FILHO, 2012).
+
+% Program to process digital images and calculate color parameters.
+% The mean of color parameters are stored in the following order: R (red), G
+% (green), B (blue), H (hue), S (saturation), V or I (value or intensity),
+% rR (relative Red), rG, rB and L (luminosity).
+% The file names and Y matriz must to be in an Excel file (first two columns).
+% To start digit imgprocess2('xlsFile','savename')
+% Savename needs to be a string
+function imgprocess2(xlsFile,savename)
+[num,txt]=xlsread(xlsFile,1);
+Ydata=num(:,1);
+FileDesc=txt(2:end,1);
+img_count=0;
+for i = 1:length(FileDesc)
+img=imread([FileDesc{i} '.jpg'],'jpg');
+ImgDat(:,:,:,i)=img;
+[m,n]=size(img(:,:,1));
+X1=reshape(img,m*n,3);
+Xout(:,1:3)=double(X1);
+Xout(:,4:6) = rgb2hsv(X1);
+soma = sum(Xout(:,1:3),2);
+Xout(:,7) = Xout(:,1)./soma;
+Xout(:,8) = Xout(:,2)./soma;
+Xout(:,9) = Xout(:,3)./soma;
+Xout(:,10) = soma;
+index=isnan(Xout);
+Xout(index)=0;
+ImgPars(i,:)=mean(Xout);
+img_count=img_count+1;
+end
+img_count=img_count-1;
+ParsDesc=['R';'G';'B';'H';'S';'V';'r';'g';...
+'b';'L'];
+save(savename,'ImgDat','FileDesc','ImgPars','ParsDesc','Ydata')
